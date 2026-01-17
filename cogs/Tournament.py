@@ -3,27 +3,25 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import dotenv_values
 from google.sheet import get_csv_form_sheet
-import asyncio
-import json
-
 
 #load .env variables
 config = dotenv_values(".env")
 ADMIN_ROLE_ID = config["ADMIN_ROLE_ID"]
 ADMIN_ROLE = config["ADMIN_ROLE"]
 
-class Tournament(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+class Tournament(commands.GroupCog, group_name="tournament"):
+    def __init__(self, bot: commands.Bot, tournament_parser: dict):
         self.bot = bot
+        self.tournament_parser = tournament_parser
 
-    @app_commands.command(name="start_tournament", description="Start a new tournament")
-    async def start_tournament(self, interaction: discord.Interaction, sheet_url: str):
+    @app_commands.command(name="create", description="Create a new tournament from a Google Sheet link")
+    async def create(self, interaction: discord.Interaction, gsheet_link: str):
         if not any(role.name == ADMIN_ROLE for role in interaction.user.roles):
             await interaction.response.send_message("❌You do not have permission to use this command.", ephemeral=True)
             return
 
         await interaction.response.defer(ephemeral=True)
-        data = get_csv_form_sheet(sheet_url)
+        data = get_csv_form_sheet(gsheet_link)
         status_code, reader = data
 
         if status_code != 200:
