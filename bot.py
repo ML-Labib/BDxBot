@@ -12,7 +12,7 @@ BOT_TOKEN = config["BOT_TOKEN"]
 class TournamentBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
-        
+
         intents.message_content = True
         intents.guilds = True
         intents.members = True
@@ -22,6 +22,7 @@ class TournamentBot(commands.Bot):
 
     async def on_ready(self):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
+
         print('------')
 
 
@@ -32,14 +33,8 @@ class TournamentBot(commands.Bot):
     # async def on_message(self, message):
     #     if message.author.bot:
     #         return
-
-
     #     else:
     #         await message.channel.send(f"Hello {message.author.mention}, you said: {message.content}")
-
-
-
-
 
 if __name__ == "__main__":
     bot = TournamentBot()

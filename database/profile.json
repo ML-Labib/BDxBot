@@ -1,0 +1,128 @@
+{
+    "teams": {
+        "Test team 2": {
+            "team_name": "Test team 2",
+            "lobby_number": "4",
+            "players": {
+                "captain": {
+                    "name": "DD",
+                    "role_given": false
+                },
+                "player_2": {
+                    "name": "EE",
+                    "role_given": false
+                },
+                "player_3": {
+                    "name": "FF",
+                    "role_given": false
+                },
+                "player_4": {
+                    "name": "",
+                    "role_given": false
+                },
+                "player_5": {
+                    "name": "",
+                    "role_given": false
+                },
+                "player_6": {
+                    "name": "",
+                    "role_given": false
+                }
+            }
+        },
+        "Test team 3": {
+            "team_name": "Test team 3",
+            "lobby_number": "5",
+            "players": {
+                "captain": {
+                    "name": "GG",
+                    "role_given": false
+                },
+                "player_2": {
+                    "name": "HH ",
+                    "role_given": false
+                },
+                "player_3": {
+                    "name": "II",
+                    "role_given": false
+                },
+                "player_4": {
+                    "name": "",
+                    "role_given": false
+                },
+                "player_5": {
+                    "name": "",
+                    "role_given": false
+                },
+                "player_6": {
+                    "name": "",
+                    "role_given": false
+                }
+            }
+        },
+        "Test Team 4": {
+            "team_name": "Test Team 4",
+            "lobby_number": "6",
+            "players": {
+                "captain": {
+                    "name": "JJ",
+                    "role_given": false
+                },
+                "player_2": {
+                    "name": "KK",
+                    "role_given": false
+                },
+                "player_3": {
+                    "name": "MM",
+                    "role_given": false
+                },
+                "player_4": {
+                    "name": "",
+                    "role_given": false
+                },
+                "player_5": {
+                    "name": "",
+                    "role_given": false
+                },
+                "player_6": {
+                    "name": "",
+                    "role_given": false
+                }
+            }
+        },
+        "Test team 1": {
+            "team_name": "Test team 1",
+            "lobby_number": "1",
+            "players": {
+                "captain": {
+                    "name": "AA",
+                    "role_given": false
+                },
+                "player_2": {
+                    "name": "New Player",
+                    "role_given": false
+                },
+                "player_3": {
+                    "name": "",
+                    "role_given": false
+                },
+                "player_4": {
+                    "name": "DD",
+                    "role_given": false
+                },
+                "player_5": {
+                    "name": "EE",
+                    "role_given": false
+                },
+                "player_6": {
+                    "name": "FF",
+                    "role_given": false
+                }
+            }
+        }
+    },
+    "vc": {},
+    "moss": {},
+    "roles": {},
+    "cleaner": {}
+}
