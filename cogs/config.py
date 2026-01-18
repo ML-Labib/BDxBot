@@ -12,7 +12,8 @@ class BotConfiguration(commands.GroupCog, group_name="config"):
         super().__init__()
         self.bot = bot
         self.config = config
-    @app_commands.guilds(1431861918246899775)
+
+    # @app_commands.guilds(1431861918246899775)
     @app_commands.command(name="moss_category", description="Set the category for MOSS submissions channels")
     async def moss_category(self, interaction: discord.Interaction, category_id: str):
         if not any(role.name == ADMIN_ROLE for role in interaction.user.roles):

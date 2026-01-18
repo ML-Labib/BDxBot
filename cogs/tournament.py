@@ -11,8 +11,10 @@ ADMIN_ROLE = config["ADMIN_ROLE"]
 
 class Tournament(commands.GroupCog, group_name="tournament"):
     def __init__(self, bot: commands.Bot, tournament_parser: dict):
+        super().__init__()
         self.bot = bot
-        self.tournament_parser = tournament_parser
+        self.profile = tournament_parser
+
 
     @app_commands.command(name="create", description="Create a new tournament from a Google Sheet link")
     async def create(self, interaction: discord.Interaction, gsheet_link: str):
@@ -27,12 +29,7 @@ class Tournament(commands.GroupCog, group_name="tournament"):
         if status_code != 200:
             await interaction.followup.send(f"❌{reader}", ephemeral=True)
             return
+        self.profile.new_profile(reader)
 
-        for teams in reader:
-            print(teams["Team_name"])
+        await interaction.followup.send("Tournament created successfully!", ephemeral=True)
 
-        await interaction.followup.send("Tournament started!", ephemeral=True)
-
-    @app_commands.command(name="end_tournament", description="End the current tournament")
-    async def end_tournament(self, interaction: discord.Interaction):
-        await interaction.response.send_message("Tournament ended!", ephemeral=True)

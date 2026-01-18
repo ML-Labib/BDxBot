@@ -2,8 +2,11 @@ import discord
 from discord import app_commands, Integration
 from discord.ext import commands
 from dotenv import dotenv_values
-from cogs.Tournament import Tournament
+
+from cogs.tournament import Tournament
 from cogs.config import BotConfiguration
+from cogs.team import Teams
+
 from parser.configParser import ConfigParser
 from parser.tournamentParser import TournamentParser
 
@@ -26,17 +29,25 @@ class TournamentBot(commands.Bot):
 
     async def on_ready(self):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
-        try: 
-            synced = await self.tree.sync(guild=self.guilds_id)
-            print(f'Synced {len(synced)} command(s) to the guild {self.guilds_id.id}.')
-        except Exception as e:
-            print(f"Sync error: {e}"    )
-
+  
 
     async def setup_hook(self):
-        # await self.add_cog(Tournament(self, self.tournament_parser))
+        await self.add_cog(Tournament(self, self.tournament_parser))
         await self.add_cog(BotConfiguration(self, self.config_parser))
-    
+        await self.add_cog(Teams(self, self.tournament_parser, self.config_parser))
+        try: 
+            # self.tree.clear_commands(guild=self.guilds_id)
+
+            # 2. Copy the "Global" commands (like your Tournament cog) to the specific Guild
+            self.tree.copy_global_to(guild=self.guilds_id)
+
+            # 3. Sync
+            synced = await self.tree.sync(guild=self.guilds_id)
+            print(f'Synced {len(synced)} command(s) to the guild {self.guilds_id.id}.')
+            
+        except Exception as e:
+            print(f"Sync error: {e}")
+        print("Cogs loaded successfully.")
 
 
     # async def on_message(self, message):
