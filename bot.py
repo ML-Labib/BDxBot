@@ -50,11 +50,6 @@ class TournamentBot(commands.Bot):
         print("Cogs loaded successfully.")
 
 
-    # async def on_message(self, message):
-    #     if message.author.bot:
-    #         return
-    #     else:
-    #         await message.channel.send(f"Hello {message.author.mention}, you said: {message.content}")
 
 if __name__ == "__main__":
     bot = TournamentBot()

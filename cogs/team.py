@@ -51,6 +51,9 @@ class Teams(commands.GroupCog, group_name="teams"):
                 self.profile.set_role_id(team_info, role.id)
 
             for player_key, player_info in team_info.get("players", {}).items():
+                if player_info["role_given"]:
+                    continue
+
                 member: discord.Member = guild.get_member_named(player_info["name"])
                 if member is None:
                     continue
@@ -148,7 +151,7 @@ class Teams(commands.GroupCog, group_name="teams"):
 
         team = self.profile.get_team(team_name)
         if team is None:
-            await interaction.response.send_message(f"❌Team '{team_name}' does not exist.", ephemeral=True)
+            await interaction.followup.send(f"❌Team '{team_name}' does not exist.", ephemeral=True)
             return
         
         role: discord.Role = discord.utils.get(guild.roles,  name=team_name)
@@ -162,9 +165,9 @@ class Teams(commands.GroupCog, group_name="teams"):
 
         success = self.profile.remove_team(team_name)
         if success:
-            await interaction.response.send_message(f"✅Team '{team_name}' removed successfully.", ephemeral=True)
+            await interaction.followup.send(f"✅Team '{team_name}' removed successfully.", ephemeral=True)
             return
-        await interaction.response.send_message(f"❌Failed to remove team '{team_name}'.", ephemeral=True)
+        await interaction.followup.send(f"❌Failed to remove team '{team_name}'.", ephemeral=True)
 
 
     @app_commands.command(name="remove_player", description="Remove a single player from a team.")
@@ -183,13 +186,19 @@ class Teams(commands.GroupCog, group_name="teams"):
         if success:
             guild = interaction.guild
             role = discord.utils.get(guild.roles, name=team_name)
+            tournament_role = discord.utils.get(guild.roles, name="Tournament")
             member = guild.get_member_named(player_name)
             if role is None or member is None:
                 await interaction.response.send_message(f"❌Player '{player_name}' does not exist.", ephemeral=True)
                 return 
             
             await member.remove_roles(role)
+            try:
+                await member.remove_roles(tournament_role)
+            except Exception as e:
+                print(e)
             await interaction.response.send_message(f"✅Player '{player_name}' has been Removed.", ephemeral=True)
+            return
         await interaction.response.send_message(f"❌Player '{player_name}' does not exist.", ephemeral=True)
 
 
@@ -206,18 +215,27 @@ class Teams(commands.GroupCog, group_name="teams"):
             if len(auth) == 0:
     
                 self.config.append_authorized(interaction.user.id)
-                await interaction.followup.send("⚠️Wating for other authorizer commad. ")
+                await interaction.followup.send("⚠️Wating for another authorizer's commad. ")
                 return
             
             if interaction.user.id in auth and len(auth) == 1:
-                await interaction.followup.send("⚠️Wating for other authorizer. ")
+                await interaction.followup.send("⚠️Wating for another authorizer's commad. ")
                 return
             
             if interaction.user.id not in auth and len(auth) == 1:
                 guild = interaction.guild
                 tournament_role: discord.Role = discord.utils.get(guild.roles, name="Tournament")
+                honorary_role: discord.Role = discord.utils.get(guild.roles, name = "Honorary Fighter") 
 
                 for team_name, team_info in self.profile.get_all_teams().items():
+                    #moving from tournament to Honorary Fighter
+                    for player_key, player_info in team_info.get("players", {}).items():
+                        member: discord.Member = guild.get_member_named(player_info['name'])
+                        if member:
+                            await member.add_roles(honorary_role)
+                            await member.remove_roles(tournament_role)
+                            
+                    #delete everything
                     vc_id = team_info["vc_id"]
                     moss_id = team_info["moss_id"]
 
@@ -225,24 +243,64 @@ class Teams(commands.GroupCog, group_name="teams"):
                     moss = guild.get_channel(int(moss_id))
                     role = discord.utils.get(guild.roles, name=team_name)
 
-
                     if vc:
                         await vc.delete()
                     if moss:
                         await moss.delete()
-                    
                     if role:
                         await role.delete()
 
                 self.profile.reset_teams()
                 self.config.reset_auth()
+
                 await interaction.followup.send(f"✅Cleanup successful.")
                 return
         await   interaction.followup.send("❌Unknown authorizer.")
         return
 
 
+    @app_commands.command(name="send_announcement", description="Send the vc and moss channel to the players.")
+    async def send_annoucement(self, interaction: discord.Integration):
 
+        if not any(role.name == ADMIN_ROLE for role in interaction.user.roles):
+            await interaction.response.send_message("❌You do not have permission to use this command.", ephemeral=True)
+            return
+        
+        await interaction.response.defer(ephemeral=True)
+
+        guild: discord.Guild = interaction.guild
+        for team_name, team_info in self.profile.get_all_teams().items():
+            for player_key, player_info in team_info.get("players", {}).items():
+                content = f"Thank you for registering in our tournament.\nTeam: **{team_name}** and lobby number: **{team_info["lobby_number"]}**\nTeam Voice channel: <#{team_info["vc_id"]}>.\nPlease submit your moss file **individually** here: <#{team_info["moss_id"]}>\n"
+                if not player_info["notified"]:
+                    member: discord.Member = guild.get_member_named(player_info["name"])
+                    if member:
+                        await member.send(f"{content} || {member.mention} ||", )
+                        self.profile.update_notified(player_info, True)
+        
+        await interaction.followup.send("✅All players have been notified.")
+
+
+    @app_commands.command(name="send_text", description="Send custom text to all team member.")
+    async def send_text(self, interaction: discord.Integration, header: str, body: str):
+        if not any(role.name == ADMIN_ROLE for role in interaction.user.roles):
+            await interaction.response.send_message("❌You do not have permission to use this command.", ephemeral=True)
+            return
+        
+        await interaction.response.defer(ephemeral=True)
+
+        guild: discord.Guild = interaction.guild
+        for team_name, team_info in self.profile.get_all_teams().items():
+            for player_key, player_info in team_info["players"].items():
+                member: discord.Member = guild.get_member_named(player_info["name"])
+                if member:
+                    await member.send(f"**{header}**\n{body} \n|| {member.mention} ||", )
+
+            moss_id = team_info.get("moss_id", "")
+            moss_channel: discord.TextChannel = guild.get_channel(int(moss_id))
+            if moss_channel:
+                await moss_channel.send(f"**{header}:\n----------------**")
+        await interaction.followup.send("✅All players have been notified.")
 
 
 

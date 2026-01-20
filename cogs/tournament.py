@@ -32,4 +32,31 @@ class Tournament(commands.GroupCog, group_name="tournament"):
         self.profile.new_profile(reader)
 
         await interaction.followup.send("Tournament created successfully!", ephemeral=True)
+        return
+    
+    @app_commands.command(name="invite", description="Invite members using Role.")
+    async def invite(self, interaction: discord.Interaction, role: str, message: str):
+        if not any(role.name == ADMIN_ROLE for role in interaction.user.roles):
+            await interaction.response.send_message("❌You do not have permission to use this command.", ephemeral=True)
+            return
+
+        await interaction.response.defer(ephemeral=True)
+        guild: discord.Guild = interaction.guild
+        role_obj = discord.utils.get(guild.roles, name = role)
+        if role_obj is None:
+            await interaction.followup.send("❌Could not find role: {role}")
+        all_members =[member async for member in guild.fetch_members(limit=None)]
+        roled_members = [m for  m in all_members if role_obj in m.roles]
+
+        counter = 0
+
+        for member in roled_members:
+            try:
+                await member.send(f"{message}\n || {member.mention} ||")
+                counter += 1
+            except Exception as e:
+                print(e)
+        await interaction.followup.send(f"Invitation has been send to **{counter}** {role} members.")
+
+
 
