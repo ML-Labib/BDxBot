@@ -52,6 +52,7 @@ class Tournament(commands.GroupCog, group_name="tournament"):
 
         for member in roled_members:
             try:
+                message = message.replace("\\n", "\n")
                 await member.send(f"{message}\n || {member.mention} ||")
                 counter += 1
             except Exception as e:
